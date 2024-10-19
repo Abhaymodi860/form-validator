@@ -1,101 +1,156 @@
-import Image from "next/image";
+"use client";
+import { useState, ChangeEvent, FormEvent } from "react";
+
+interface FormData {
+  username: string;
+  email: string;
+  password: string;
+  password2: string;
+}
+
+interface FormErrors {
+  username?: string;
+  email?: string;
+  password?: string;
+  password2?: string;
+}
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [formData, setFormData] = useState<FormData>({
+    username: "",
+    email: "",
+    password: "",
+    password2: "",
+  });
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+  const [errors, setErrors] = useState<FormErrors>({});
+
+  // Define regex in a variable
+  const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const validationErrors = validateForm();
+    setErrors(validationErrors);
+  };
+
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData({ ...formData, [id]: value });
+  };
+
+  const validateForm = (): FormErrors => {
+    const errors: FormErrors = {};
+    if (!formData.username) errors.username = "Username is required";
+    if (!formData.email) errors.email = "Email is required";
+
+    // Use the regex variable for email validation
+    if (!emailRegex.test(formData.email)) {
+      errors.email = "Invalid email address";
+    }
+
+    if (formData.password.length < 6 || formData.password.length > 25) {
+      errors.password = "Password must be between 6 and 25 characters";
+    }
+
+    if (formData.password !== formData.password2) {
+      errors.password2 = "Passwords do not match";
+    }
+
+    return errors;
+  };
+
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-600">
+      <div className="bg-black p-8 rounded shadow-md w-96">
+        <h2 className="text-center text-xl font-semibold mb-6">
+          Register with us
+        </h2>
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label htmlFor="username" className="block text-gray-300">
+              Username
+            </label>
+            <input
+              type="text"
+              id="username"
+              className={`w-full p-2 border ${
+                errors.username ? "border-red-500" : "border-gray-300"
+              } rounded`}
+              value={formData.username}
+              onChange={handleInputChange}
+              placeholder="Enter username"
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            {errors.username && (
+              <p className="text-red-500 text-sm">{errors.username}</p>
+            )}
+          </div>
+
+          <div className="mb-4">
+            <label htmlFor="email" className="block text-gray-300">
+              Email
+            </label>
+            <input
+              type="text"
+              id="email"
+              className={`w-full p-2 border ${
+                errors.email ? "border-red-500" : "border-gray-300"
+              } rounded`}
+              value={formData.email}
+              onChange={handleInputChange}
+              placeholder="Enter email"
+            />
+            {errors.email && (
+              <p className="text-red-500 text-sm">{errors.email}</p>
+            )}
+          </div>
+
+          <div className="mb-4">
+            <label htmlFor="password" className="block text-gray-300">
+              Password
+            </label>
+            <input
+              type="password"
+              id="password"
+              className={`w-full p-2 border ${
+                errors.password ? "border-red-500" : "border-gray-300"
+              } rounded text-black`}
+              value={formData.password}
+              onChange={handleInputChange}
+              placeholder="Enter password"
+            />
+            {errors.password && (
+              <p className="text-red-500 text-sm">{errors.password}</p>
+            )}
+          </div>
+
+          <div className="mb-4">
+            <label htmlFor="password2" className="block text-gray-300">
+              Confirm Password
+            </label>
+            <input
+              type="password"
+              id="password2"
+              className={`w-full p-2 border ${
+                errors.password2 ? "border-red-500" : "border-gray-700"
+              } rounded text-black`}
+              value={formData.password2}
+              onChange={handleInputChange}
+              placeholder="Confirm password"
+            />
+            {errors.password2 && (
+              <p className="text-red-500 text-sm">{errors.password2}</p>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-blue-500 text-white p-2 rounded"
           >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+            Submit
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
